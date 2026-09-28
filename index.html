@@ -1,1 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRM Lost & Found Hub | Kattankulathur Campus</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              900: '#064e3b',
+              950: '#022c22'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
 
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    .animate-pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-[#020617] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black pb-16 min-h-screen">
+
+  <!-- Ambient background glow elements -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px]"></div>
+    <div class="absolute top-1/3 -right-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]"></div>
+    <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-rose-500/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Live Campus Hub Ticker Bar -->
+  <div class="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-slate-800/80 text-xs py-2 px-4 relative z-20 overflow-hidden backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2 overflow-hidden w-full sm:w-auto">
+        <span class="flex h-2 w-2 relative flex-shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="font-semibold text-emerald-400 uppercase tracking-wider text-[10px] bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+          LIVE HUB TICKER
+        </span>
+        <p class="text-slate-300 truncate text-[11px] font-mono">
+          🎉 3 AirPods, 1 Student ID & 1 Wallet safely recovered today at UB & Tech Park Security Desks!
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3 text-slate-400 text-[11px] flex-shrink-0">
+        <span class="flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-0.5 rounded-full border border-emerald-500/30 text-emerald-400 font-mono">
+          <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+          @srmist.edu.in Verified
+        </span>
+        <span class="hidden md:inline text-slate-500">|</span>
+        <span class="hidden md:flex items-center gap-1 font-mono text-amber-400">
+          <i class="fa-solid fa-fire"></i>
+          Karma Balance: <strong id="user-karma-display" class="text-white">150 PTS</strong>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Header Navbar -->
+  <header class="sticky top-0 z-30 bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-800/80 shadow-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-4">
+        
+        <!-- SRM Brand Logo -->
+        <div className="flex items-center gap-3 cursor-pointer" onclick="switchTab('feed')">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-indigo-600 p-[1px] shadow-lg shadow-emerald-500/20">
+              <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
+                <i class="fa-solid fa-compass text-emerald-400 text-lg animate-pulse"></i>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                  SRM LOST & FOUND
+                </h1>
+                <span class="text-[9px] bg-cyan-500/10 text-cyan-400 font-mono px-1.5 py-0.2 rounded border border-cyan-500/30">
+                  KTR HUB
+                </span>
+              </div>
+              <p class="text-[10px] text-slate-400 font-mono">Kattankulathur Campus Security Network</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <nav class="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+          <button onclick="switchTab('feed')" id="nav-btn-feed" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow-md">
+            <i class="fa-solid fa-radio"></i> Main Feed
+          </button>
+          <button onclick="switchTab('map')" id="nav-btn-map" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
+            <i class="fa-solid fa-location-dot"></i> Campus Map
+          </button>
+          <button onclick="switchTab('idscanner')" id="nav-btn-idscanner" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
+            <i class="fa-solid fa-id-card"></i> ID AI Scanner
+          </button>
+          <button onclick="switchTab('admin')" id="nav-btn-admin" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
+            <i class="fa-solid fa-user-shield"></i> Guard Desk
+          </button>
+          <button onclick="switchTab('analytics')" id="nav-btn-analytics" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
+            <i class="fa-solid fa-chart-pie"></i> Heatmap & Stats
+          </button>
+          <button onclick="switchTab('karma')" id="nav-btn-karma" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50">
+            <i class="fa-solid fa-award"></i> Karma Vault
+          </button>
+        </nav>
+
+        <!-- Quick Snap Action CTA Button -->
+        <div class="flex items-center gap-2">
+          <button onclick="openQuickSnapModal()" class="relative group overflow-hidden rounded-xl p-[1px] focus:outline-none">
+            <span class="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-400 rounded-xl"></span>
+            <div class="relative px-3.5 py-2 rounded-[11px] bg-slate-950 flex items-center gap-2 transition-all group-hover:bg-transparent">
+              <i class="fa-solid fa-plus text-emerald-400 group-hover:text-black"></i>
+              <span class="text-xs font-bold text-white group-hover:text-black hidden sm:inline">
+                + Quick Snap (15s)
+              </span>
+              <span class="text-xs font-bold text-white sm:hidden">Post</span>
+            </div>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Bottom/Sub Navigation -->
+    <div class="lg:hidden flex overflow-x-auto border-t border-slate-800/80 px-2 py-1.5 gap-1 no-scrollbar bg-slate-950/90">
+      <button onclick="switchTab('feed')" id="mob-btn-feed" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+        <i class="fa-solid fa-radio"></i> Feed
+      </button>
+      <button onclick="switchTab('map')" id="mob-btn-map" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-400">
+        <i class="fa-solid fa-location-dot"></i> Campus Map
+      </button>
+      <button onclick="switchTab('idscanner')" id="mob-btn-idscanner" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-400">
+        <i class="fa-solid fa-id-card"></i> ID AI Scan
+      </button>
+      <button onclick="switchTab('admin')" id="mob-btn-admin" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-400">
+        <i class="fa-solid fa-user-shield"></i> Guard Desk
+      </button>
+      <button onclick="switchTab('analytics')" id="mob-btn-analytics" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-400">
+        <i class="fa-solid fa-chart-pie"></i> Analytics
+      </button>
+      <button onclick="switchTab('karma')" id="mob-btn-karma" class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 text-slate-400">
+        <i class="fa-solid fa-award"></i> Karma
+      </button>
+    </div>
+  </header>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-20 right-4 z-50 pointer-events-none transition-all duration-300"></div>
+
+  <!-- Main View Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
+
+    <!-- VIEW 1: MAIN FEED -->
+    <section id="view-feed" class="tab-view space-y-6">
+      
+      <!-- Filter and Search Bar -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 backdrop-blur-md space-y-4 shadow-xl">
+        <div class="flex flex-col md:flex-row gap-3">
+          <!-- Search input -->
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 text-xs"></i>
+            <input
+              type="text"
+              id="search-input"
+              oninput="handleSearchFilter()"
+              placeholder="Search by item name, ID number, or landmark (e.g. AirPods, Tech Park, Wallet)..."
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+            />
+            <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Building Pills -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+            <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1 flex-shrink-0">
+              <i class="fa-solid fa-filter text-emerald-400"></i> Building:
+            </span>
+            <button onclick="setBuildingFilter('ALL')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-800 text-emerald-400 border border-emerald-500/30" data-bldg="ALL">
+              All Campus
+            </button>
+            <button onclick="setBuildingFilter('ub')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-950 text-slate-400 hover:text-white" data-bldg="ub">UB</button>
+            <button onclick="setBuildingFilter('tp')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-950 text-slate-400 hover:text-white" data-bldg="tp">TP</button>
+            <button onclick="setBuildingFilter('lib')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-950 text-slate-400 hover:text-white" data-bldg="lib">LIB</button>
+            <button onclick="setBuildingFilter('java')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-950 text-slate-400 hover:text-white" data-bldg="java">JAVA</button>
+            <button onclick="setBuildingFilter('arch')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-950 text-slate-400 hover:text-white" data-bldg="arch">ARCH</button>
+            <button onclick="setBuildingFilter('hostel')" class="bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 bg-slate-950 text-slate-400 hover:text-white" data-bldg="hostel">HSTL</button>
+          </div>
+        </div>
+
+        <!-- Status Filter Row -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+          <div class="flex items-center gap-1.5 overflow-x-auto">
+            <span class="text-[11px] font-mono text-slate-400">Status:</span>
+            <button onclick="setStatusFilter('ALL')" class="status-filter-btn px-2.5 py-1 rounded-md text-[11px] font-medium transition-all bg-slate-800 text-white border border-slate-700" data-status="ALL">All Items</button>
+            <button onclick="setStatusFilter('AT_SECURITY')" class="status-filter-btn px-2.5 py-1 rounded-md text-[11px] font-medium transition-all text-slate-400 hover:text-slate-200" data-status="AT_SECURITY">🛡️ At Security Vault</button>
+            <button onclick="setStatusFilter('ACTIVE_LOST')" class="status-filter-btn px-2.5 py-1 rounded-md text-[11px] font-medium transition-all text-slate-400 hover:text-slate-200" data-status="ACTIVE_LOST">⚡ Active Lost</button>
+            <button onclick="setStatusFilter('RECOVERED')" class="status-filter-btn px-2.5 py-1 rounded-md text-[11px] font-medium transition-all text-slate-400 hover:text-slate-200" data-status="RECOVERED">✅ Recovered</button>
+          </div>
+
+          <p class="text-[11px] font-mono text-slate-500">
+            Showing <span id="item-count-display" class="text-emerald-400 font-bold">5</span> active listings
+          </p>
+        </div>
+      </div>
+
+      <!-- Feed Cards Container -->
+      <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: CAMPUS INTERACTIVE MAP -->
+    <section id="view-map" class="tab-view hidden space-y-4">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md">
+        <div>
+          <h2 class="font-bold text-sm text-white flex items-center gap-2">
+            <i class="fa-solid fa-compass text-emerald-400 animate-spin" style="animation-duration: 10s;"></i>
+            SRM IST Kattankulathur Interactive Campus Map
+          </h2>
+          <p class="text-xs text-slate-400 font-mono">
+            Map Coordinates: 12.8231° N, 80.0442° E • Real-time Vault Locations
+          </p>
+        </div>
+
+        <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto no-scrollbar">
+          <button onclick="renderMapPins('ALL')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20" data-mbldg="ALL">All Buildings</button>
+          <button onclick="renderMapPins('ub')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-950 text-slate-400 hover:text-white" data-mbldg="ub">UB</button>
+          <button onclick="renderMapPins('tp')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-950 text-slate-400 hover:text-white" data-mbldg="tp">TP</button>
+          <button onclick="renderMapPins('lib')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-950 text-slate-400 hover:text-white" data-mbldg="lib">LIB</button>
+          <button onclick="renderMapPins('java')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-950 text-slate-400 hover:text-white" data-mbldg="java">JAVA</button>
+          <button onclick="renderMapPins('arch')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-950 text-slate-400 hover:text-white" data-mbldg="arch">ARCH</button>
+          <button onclick="renderMapPins('hostel')" class="map-bldg-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-950 text-slate-400 hover:text-white" data-mbldg="hostel">HSTL</button>
+        </div>
+      </div>
+
+      <!-- Map Display Canvas -->
+      <div class="relative w-full h-[520px] bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40"></div>
+
+        <!-- Campus Outlines SVG -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+          <line x1="10%" y1="80%" x2="85%" y2="25%" stroke="#334155" stroke-width="4" stroke-dasharray="6 6" />
+          <line x1="40%" y1="10%" x2="40%" y2="90%" stroke="#334155" stroke-width="3" />
+          
+          <rect x="37%" y="34%" width="10%" height="8%" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="42%" y="39%" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">UB</text>
+
+          <rect x="60%" y="24%" width="10%" height="8%" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="65%" y="29%" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">TP</text>
+
+          <rect x="25%" y="51%" width="10%" height="8%" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="30%" y="56%" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">LIB</text>
+
+          <rect x="50%" y="58%" width="10%" height="8%" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="55%" y="63%" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">JAVA</text>
+
+          <rect x="10%" y="76%" width="10%" height="8%" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="15%" y="81%" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">ARCH</text>
+
+          <rect x="75%" y="71%" width="10%" height="8%" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="80%" y="76%" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle">HSTL</text>
+        </svg>
+
+        <!-- Map Legend -->
+        <div class="absolute top-4 left-4 z-10 bg-slate-900/90 border border-slate-800 backdrop-blur-md px-3 py-2 rounded-xl space-y-1.5 text-[11px] font-mono">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-slate-200">Green Pin = At Security Vault</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+            <span class="text-slate-200">Red Pin = Active Lost Item</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Pins Container -->
+        <div id="map-pins-container"></div>
+
+        <!-- Dynamic Pin Popup Modal/Card -->
+        <div id="map-popup-card" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-full max-w-sm px-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: ID CARD AI OCR SCANNER -->
+    <section id="view-idscanner" class="tab-view hidden max-w-3xl mx-auto space-y-6">
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center space-y-2 backdrop-blur-md">
+        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+          <i class="fa-solid fa-id-card text-xl animate-pulse"></i>
+        </div>
+        <h2 class="font-extrabold text-lg text-white">ID Card AI OCR Auto-Finder Engine</h2>
+        <p class="text-xs text-slate-400 max-w-lg mx-auto font-sans">
+          Upload a photo of a found SRM Student ID Card. Our vision model automatically extracts the NetID / Register Number and dispatches an instant claim link to <code class="text-emerald-400 font-mono">netID@srmist.edu.in</code>.
+        </p>
+      </div>
+
+      <!-- Drag and Drop Box -->
+      <div class="bg-slate-950 border-2 border-dashed border-slate-800 hover:border-emerald-500/50 rounded-2xl p-8 text-center transition-all cursor-pointer space-y-4" onclick="simulateOCRScan()">
+        <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-emerald-400">
+          <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+        </div>
+        <div>
+          <span class="text-xs font-bold text-emerald-400">Click to Select ID Card Photo (Simulation)</span>
+          <p class="text-[11px] text-slate-500 font-mono mt-0.5">Supports PNG, JPG, WEBP (Max 10MB)</p>
+        </div>
+      </div>
+
+      <!-- Scanning Progress Display -->
+      <div id="ocr-loading" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-6 text-center space-y-3">
+        <i class="fa-solid fa-spinner text-2xl text-cyan-400 animate-spin"></i>
+        <p class="text-xs font-mono text-cyan-300">Analyzing card layout & extracting NetID token...</p>
+      </div>
+
+      <!-- OCR Extraction Result Box -->
+      <div id="ocr-result" class="hidden bg-slate-900/90 border border-emerald-500/40 rounded-2xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <h3 class="font-bold text-sm text-white">OCR Extraction Successful</h3>
+          </div>
+          <span class="text-[10px] font-mono bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">
+            Confidence: 99.4%
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-slate-500 block text-[10px]">EXTRACTED NETID / REG</span>
+            <span class="text-emerald-400 font-bold text-sm">RA2111003010198</span>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-slate-500 block text-[10px]">STUDENT NAME</span>
+            <span class="text-slate-200 font-bold text-sm">Siddharth V.</span>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 sm:col-span-2">
+            <span class="text-slate-500 block text-[10px]">TARGET CAMPUS EMAIL</span>
+            <span class="text-cyan-400 font-bold text-xs">ra2111003010198@srmist.edu.in</span>
+          </div>
+        </div>
+
+        <div id="email-dispatch-box" class="pt-2">
+          <button onclick="dispatchCampusEmail()" class="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            Dispatch Direct Recovery Link to ra2111003010198@srmist.edu.in
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: GUARD DESK ADMIN CONSOLE -->
+    <section id="view-admin" class="tab-view hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <i class="fa-solid fa-user-shield text-xl"></i>
+          </div>
+          <div>
+            <h2 class="font-extrabold text-base text-white">SRM Guard Desk / Hub Admin Console</h2>
+            <p class="text-xs text-slate-400 font-mono">
+              /admin/guard-desk • Fast Logging & Vault Custody
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-xl">
+            ● Guard Station #04 Active
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Guard Entry Form -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <h3 class="font-bold text-xs text-slate-300 uppercase font-mono flex items-center gap-2">
+          <i class="fa-solid fa-plus text-emerald-400"></i> 1-Click Guard Quick Item Log
+        </h3>
+
+        <form onsubmit="handleGuardLogSubmit(event)" class="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            id="guard-item-title"
+            required
+            placeholder="Item description (e.g. Blue Umbrella, Honda Bike Key)..."
+            class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+          />
+
+          <select id="guard-item-hub" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <option value="ub">University Building (UB)</option>
+            <option value="tp" selected>Tech Park (TP)</option>
+            <option value="lib">Central Library</option>
+            <option value="java">Java Green Canteen</option>
+            <option value="arch">Arch Gate</option>
+            <option value="hostel">Belagavi Hostels</option>
+          </select>
+
+          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2 rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5">
+            Log to Vault
+          </button>
+        </form>
+      </div>
+
+      <!-- Vault Inventory Table -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+          <h3 class="font-bold text-xs text-white uppercase font-mono">Current Vault Inventory</h3>
+          <span id="vault-count" class="text-[11px] font-mono text-slate-400">Total Vault Items: 3</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-950 text-[10px] font-mono text-slate-400 border-b border-slate-800">
+                <th class="p-3.5">REF ID</th>
+                <th class="p-3.5">ITEM NAME</th>
+                <th class="p-3.5">DESK LOCATION</th>
+                <th class="p-3.5">STATUS</th>
+                <th class="p-3.5">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body" class="divide-y divide-slate-800/80 text-xs">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: ANALYTICS & HEATMAP -->
+    <section id="view-analytics" class="tab-view hidden space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-1 backdrop-blur-md">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">Recovery Rate</span>
+          <p class="text-2xl font-extrabold text-emerald-400 font-mono">88.4%</p>
+          <p class="text-[11px] text-slate-500 font-sans">+12% higher than last semester</p>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-1 backdrop-blur-md">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">Avg Recovery Speed</span>
+          <p class="text-2xl font-extrabold text-cyan-400 font-mono">4.2 Hours</p>
+          <p class="text-[11px] text-slate-500 font-sans">Fastest via OTP Vault</p>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-1 backdrop-blur-md">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">Total Karma Rewarded</span>
+          <p class="text-2xl font-extrabold text-amber-400 font-mono">14,250 PTS</p>
+          <p class="text-[11px] text-slate-500 font-sans">Distributed to 285 finders</p>
+        </div>
+      </div>
+
+      <!-- Campus Hotspots -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <h3 class="font-bold text-sm text-white flex items-center gap-2">
+          <i class="fa-solid fa-fire text-rose-400"></i> Top 3 Lost-Item Hotspots on SRM Campus
+        </h3>
+
+        <div class="space-y-3">
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono font-bold flex items-center justify-center text-xs">#1</span>
+              <div>
+                <h4 class="font-bold text-xs text-white">Tech Park 3rd & 4th Floor Computer Labs</h4>
+                <span class="text-[10px] font-mono text-slate-400">42 items logged</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-mono text-sm font-extrabold text-rose-400">34%</span>
+              <span class="block text-[10px] text-slate-500">Incident Share</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono font-bold flex items-center justify-center text-xs">#2</span>
+              <div>
+                <h4 class="font-bold text-xs text-white">University Building (UB) Classrooms</h4>
+                <span class="text-[10px] font-mono text-slate-400">35 items logged</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-mono text-sm font-extrabold text-rose-400">28%</span>
+              <span class="block text-[10px] text-slate-500">Incident Share</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono font-bold flex items-center justify-center text-xs">#3</span>
+              <div>
+                <h4 class="font-bold text-xs text-white">Central Library Quiet Reading Room</h4>
+                <span class="text-[10px] font-mono text-slate-400">22 items logged</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-mono text-sm font-extrabold text-rose-400">18%</span>
+              <span class="block text-[10px] text-slate-500">Incident Share</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: KARMA VAULT PERKS -->
+    <section id="view-karma" class="tab-view hidden max-w-3xl mx-auto space-y-6">
+      <div class="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-6 text-center space-y-3 backdrop-blur-md relative overflow-hidden">
+        <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+          <i class="fa-solid fa-award text-3xl"></i>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-xl text-white">SRM Karma Token Rewards System</h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Earn +50 Karma Points every time you safely return an item via OTP Vault Verification.
+          </p>
+        </div>
+
+        <div class="inline-flex items-center gap-3 bg-slate-950 px-6 py-2.5 rounded-2xl border border-slate-800">
+          <span class="text-xs text-slate-400 font-mono">Your Current Balance:</span>
+          <span id="karma-vault-points" class="text-xl font-extrabold text-amber-400 font-mono">150 PTS</span>
+        </div>
+
+        <div class="pt-2 text-center">
+          <span class="text-[11px] font-mono text-slate-400 bg-slate-950/80 px-3 py-1 rounded-full border border-slate-800">
+            🔒 Safeguard Active: <span id="karma-monthly-count">1</span> / 2 Rewarded Returns used this month
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h3 class="font-bold text-sm text-white font-mono uppercase">Available SRM Student Perks</h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <i class="fa-solid fa-book-bookmark text-lg"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-white">7-Day Library Loan Extension</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Extend any central library book checkout duration automatically.</p>
+            </div>
+            <button onclick="showToast('Library extension voucher applied to netID!')" class="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-mono text-xs py-2 rounded-xl border border-indigo-500/30">
+              Redeem (50 PTS)
+            </button>
+          </div>
+
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <i class="fa-solid fa-mug-hot text-lg"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-white">10% Java Green Cafe Coupon</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Valid at Java Green Canteen on all coffee & snack orders.</p>
+            </div>
+            <button onclick="showToast('Coupon code JAVA-KARMA-50 copied!')" class="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-mono text-xs py-2 rounded-xl border border-emerald-500/30">
+              Code: JAVA-KARMA-50
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: ITEM DETAIL DRAWER -->
+  <div id="item-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="relative w-full max-w-2xl bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div class="flex items-center gap-2">
+          <span id="detail-item-id" class="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
+            #SRM-0000
+          </span>
+          <h2 id="detail-item-title" class="font-bold text-sm text-white truncate max-w-md">Item Name</h2>
+        </div>
+        <button onclick="closeModal('item-detail-modal')" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6">
+        <div class="relative h-64 w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+          <img id="detail-item-img" src="" alt="" class="w-full h-full object-cover">
+          <button id="detail-blur-toggle-btn" onclick="toggleDetailBlur()" class="hidden absolute top-3 right-3 bg-slate-900/90 text-white text-xs px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-2 shadow-lg backdrop-blur-md">
+            <i class="fa-solid fa-eye text-emerald-400"></i> Unmask Document
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Campus Location Landmark</span>
+            <p id="detail-item-loc" class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-location-dot text-rose-400"></i> Location Spot
+            </p>
+          </div>
+
+          <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Current Drop-off Hub</span>
+            <p id="detail-item-hub" class="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-emerald-400"></i> Hub Name
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/80 space-y-2">
+          <h4 class="text-xs font-mono text-slate-400 uppercase">Item Description & Physical Tags</h4>
+          <p id="detail-item-desc" class="text-xs text-slate-300 leading-relaxed">Description goes here...</p>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-900/80 flex items-center gap-3">
+        <button onclick="closeModal('item-detail-modal')" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+          Close
+        </button>
+        <button id="detail-claim-btn" onclick="openClaimModalFromDetail()" class="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-qrcode"></i> Claim via OTP Escrow Pass
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 15-SEC QUICK SNAP -->
+  <div id="quick-snap-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="relative w-full max-w-lg bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <h2 class="font-bold text-sm text-white">⚡ 15-Second Quick-Snap Post</h2>
+        </div>
+        <button onclick="closeModal('quick-snap-modal')" class="p-1 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleQuickSnapSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">Item Title / Name *</label>
+          <input type="text" id="qs-title" required placeholder="e.g. Titan Keychain or Sony Headphones" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Category</label>
+            <select id="qs-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <option>Electronics</option>
+              <option>ID & Documents</option>
+              <option>Personal Belongings</option>
+              <option>Accessories</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">SRM Landmark *</label>
+            <select id="qs-landmark" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <option value="ub">University Building (UB)</option>
+              <option value="tp" selected>Tech Park (TP)</option>
+              <option value="lib">Central Library</option>
+              <option value="java">Java Green Canteen</option>
+              <option value="arch">Arch Gate</option>
+              <option value="hostel">Belagavi Hostels</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">Exact Spot / Floor</label>
+          <input type="text" id="qs-location" placeholder="e.g. 3rd Floor Lab 304 near window" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">Description</label>
+          <textarea id="qs-desc" rows="2" placeholder="Key colors, brand, or unique marks..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i> Publish Quick Snap Post Now
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CLAIM OTP ESCROW -->
+  <div id="claim-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="relative w-full max-w-md bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl p-6 space-y-5">
+      <button onclick="closeModal('claim-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="text-center space-y-1">
+        <span class="text-[10px] font-mono bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded">
+          Vault Escrow Pass
+        </span>
+        <h2 class="font-bold text-base text-white">OTP Escrow Claim Pass</h2>
+        <p id="claim-ref-id" class="text-xs text-slate-400 font-mono">Item Ref: #SRM-8891</p>
+      </div>
+
+      <div class="bg-slate-950 border border-emerald-500/40 p-5 rounded-2xl text-center space-y-2">
+        <span class="text-[10px] font-mono text-slate-400 uppercase">Your Dynamic 6-Digit Claim Pass</span>
+        <div id="claim-otp-code" class="text-3xl font-extrabold font-mono tracking-widest text-emerald-400">884209</div>
+        <p class="text-[10px] text-slate-500">Show this pass to the Security Desk Officer</p>
+      </div>
+
+      <div class="space-y-3">
+        <label class="block text-xs font-mono text-slate-400">
+          Guard Entry (Type OTP above to confirm handover):
+        </label>
+        <input type="text" id="guard-otp-input" maxlength="6" placeholder="Enter 6-digit OTP..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-center text-sm font-mono text-white tracking-widest focus:outline-none focus:border-emerald-500" />
+        <p id="otp-error-msg" class="hidden text-xs text-rose-400 font-mono text-center">Invalid OTP code entered.</p>
+
+        <button onclick="verifyClaimOtp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-3 rounded-xl shadow-lg shadow-emerald-500/20">
+          Verify Handover & Complete Claim
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initial SRM Campus Data Items
+    const SRM_BUILDINGS = {
+      ub: { name: 'University Building (UB)', code: 'UB', ext: '401', coords: { x: 42, y: 38 } },
+      tp: { name: 'Tech Park (TP)', code: 'TP', ext: '402', coords: { x: 65, y: 28 } },
+      lib: { name: 'Central Library', code: 'LIB', ext: '403', coords: { x: 30, y: 55 } },
+      java: { name: 'Java Green Canteen', code: 'JAVA', ext: '404', coords: { x: 55, y: 62 } },
+      arch: { name: 'Arch Gate Main Entrance', code: 'ARCH', ext: '405', coords: { x: 15, y: 80 } },
+      hostel: { name: 'Belagavi & MTP Hostels', code: 'HSTL', ext: '406', coords: { x: 80, y: 75 } }
+    };
+
+    let itemsData = [
+      {
+        id: 'SRM-8891',
+        title: 'AirPods Pro (2nd Gen) with MagSafe Case',
+        category: 'Electronics',
+        location: 'Tech Park 3rd Floor - Lab 302',
+        buildingId: 'tp',
+        status: 'AT_SECURITY',
+        dropoffHub: 'Tech Park Security Desk (Ext 402)',
+        finderName: 'Ananya R. (CSE 3rd Year)',
+        timestamp: '25 mins ago',
+        sensitiveInfo: false,
+        image: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=600&q=80',
+        description: 'Found near Workstation 14 in TP Lab 302. Has a dark matte blue protective silicone case.',
+        coords: { x: 65, y: 28 }
+      },
+      {
+        id: 'SRM-8892',
+        title: 'SRM Student ID Card (Reg: RA2111003010198)',
+        category: 'ID & Documents',
+        location: 'Central Library 2nd Floor Reading Room',
+        buildingId: 'lib',
+        status: 'AT_SECURITY',
+        dropoffHub: 'Library Gate Security Desk (Ext 403)',
+        finderName: 'Library Guard K. Ram',
+        timestamp: '1 hour ago',
+        sensitiveInfo: true,
+        image: 'https://images.unsplash.com/photo-1578836537282-3171d77f8632?auto=format&fit=crop&w=600&q=80',
+        description: 'B.Tech IT Student ID card with blue lanyard. Found near silent study cubicle #12.',
+        coords: { x: 30, y: 55 }
+      },
+      {
+        id: 'SRM-8893',
+        title: 'Matte Blue Leather Wallet with Cards',
+        category: 'Personal Belongings',
+        location: 'Java Green Canteen Bench',
+        buildingId: 'java',
+        status: 'ACTIVE_LOST',
+        dropoffHub: 'Unclaimed / Active Search',
+        finderName: 'Priya S.',
+        timestamp: '2 hours ago',
+        sensitiveInfo: true,
+        image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80',
+        description: 'Lost wallet containing driver license and campus dining pass. Urgent!',
+        coords: { x: 55, y: 62 }
+      },
+      {
+        id: 'SRM-8894',
+        title: 'Casio G-Shock Matte Black Watch',
+        category: 'Accessories',
+        location: 'Arch Gate Bus Shuttle Stop',
+        buildingId: 'arch',
+        status: 'AT_SECURITY',
+        dropoffHub: 'Main Gate Security Gatepost',
+        finderName: 'Security Guard Suresh',
+        timestamp: '3 hours ago',
+        sensitiveInfo: false,
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
+        description: 'Found on seat #3 at the campus shuttle shelter. Scratched bezel.',
+        coords: { x: 15, y: 80 }
+      },
+      {
+        id: 'SRM-8895',
+        title: 'Dell XPS 130W USB-C Power Adapter',
+        category: 'Electronics',
+        location: 'UB 2nd Floor Room 204',
+        buildingId: 'ub',
+        status: 'ACTIVE_LOST',
+        dropoffHub: 'Unclaimed',
+        finderName: 'Karthik M.',
+        timestamp: '5 hours ago',
+        sensitiveInfo: false,
+        image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=600&q=80',
+        description: 'Black charger with thick rubber cord left connected under back row desk.',
+        coords: { x: 42, y: 38 }
+      }
+    ];
+
+    let currentBuildingFilter = 'ALL';
+    let currentStatusFilter = 'ALL';
+    let activeSelectedItem = null;
+    let userKarma = 150;
+    let monthlyReturns = 1;
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      // Update Nav buttons state
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800/50';
+      });
+      const activeNav = document.getElementById(`nav-btn-${tabId}`);
+      if (activeNav) {
+        activeNav.className = 'tab-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow-md';
+      }
+
+      if (tabId === 'map') renderMapPins(currentBuildingFilter);
+      if (tabId === 'admin') renderAdminTable();
+    }
+
+    // Toast Alert Helper
+    function showToast(message) {
+      const toastContainer = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'bg-slate-900 text-slate-100 border border-emerald-500/50 shadow-2xl px-4 py-3 rounded-xl flex items-center gap-3 backdrop-blur-xl max-w-md pointer-events-auto mb-2 animate-bounce';
+      toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i> <p class="text-xs font-medium">${message}</p>`;
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function renderFeedItems() {
+      const grid = document.getElementById('items-grid');
+      const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+
+      const filtered = itemsData.filter(item => {
+        const matchesSearch = item.title.toLowerCase().includes(searchQuery) ||
+                              item.location.toLowerCase().includes(searchQuery) ||
+                              item.id.toLowerCase().includes(searchQuery);
+        const matchesBuilding = currentBuildingFilter === 'ALL' || item.buildingId === currentBuildingFilter;
+        const matchesStatus = currentStatusFilter === 'ALL' || item.status === currentStatusFilter;
+        return matchesSearch && matchesBuilding && matchesStatus;
+      });
+
+      document.getElementById('item-count-display').innerText = filtered.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-slate-900/40 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
+            <i class="fa-solid fa-circle-info text-3xl text-slate-600"></i>
+            <h3 class="text-sm font-semibold text-slate-300">No matching lost or found items</h3>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">Try adjusting your filters or search query.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => {
+        let statusBadge = '';
+        if (item.status === 'AT_SECURITY') {
+          statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"><i class="fa-solid fa-shield-halved"></i> At Security Vault</span>`;
+        } else if (item.status === 'ACTIVE_LOST') {
+          statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30"><i class="fa-solid fa-triangle-exclamation"></i> Active Lost</span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30"><i class="fa-solid fa-circle-check"></i> Recovered</span>`;
+        }
+
+        const isBlurred = item.sensitiveInfo;
+
+        return `
+          <div class="group relative bg-slate-900/70 border border-slate-800 hover:border-slate-700 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-1 flex flex-col">
+            <div class="relative h-48 w-full bg-slate-950 overflow-hidden">
+              <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover transition-all duration-500 ${isBlurred ? 'blur-md scale-110 opacity-70' : ''}">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+              <div class="absolute top-3 left-3 flex flex-col gap-1.5 z-10">${statusBadge}</div>
+              <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-slate-300 z-10">
+                <span class="bg-slate-900/90 backdrop-blur-md px-2 py-0.5 rounded font-mono text-[10px] text-cyan-300 border border-slate-800">#${item.id}</span>
+                <span class="text-[11px] font-mono text-slate-400"><i class="fa-regular fa-clock"></i> ${item.timestamp}</span>
+              </div>
+            </div>
+
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors line-clamp-1">${item.title}</h3>
+                <p class="text-xs text-slate-400 flex items-center gap-1 mt-1 truncate">
+                  <i class="fa-solid fa-location-dot text-rose-400"></i> ${item.location}
+                </p>
+              </div>
+
+              <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-[11px] space-y-1 font-mono">
+                <div class="text-slate-400 flex justify-between">
+                  <span>Location Hub:</span>
+                  <span class="text-slate-200 truncate ml-2">${item.dropoffHub}</span>
+                </div>
+              </div>
+
+              <div class="pt-2 flex items-center gap-2">
+                <button onclick="openDetailModal('${item.id}')" class="flex-1 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2 rounded-xl transition-all border border-slate-700/50">Details</button>
+                ${item.status === 'AT_SECURITY' ? `<button onclick="openClaimModal('${item.id}')" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-2 rounded-xl transition-all shadow-md shadow-emerald-500/20"><i class="fa-solid fa-qrcode"></i> Claim OTP</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleSearchFilter() {
+      const val = document.getElementById('search-input').value;
+      document.getElementById('clear-search-btn').classList.toggle('hidden', !val);
+      renderFeedItems();
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      renderFeedItems();
+    }
+
+    function setBuildingFilter(bldg) {
+      currentBuildingFilter = bldg;
+      document.querySelectorAll('.bldg-filter-btn').forEach(btn => {
+        const isSel = btn.dataset.bldg === bldg;
+        btn.className = `bldg-filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 ${isSel ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'bg-slate-950 text-slate-400 hover:text-white'}`;
+      });
+      renderFeedItems();
+    }
+
+    function setStatusFilter(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.status-filter-btn').forEach(btn => {
+        const isSel = btn.dataset.status === status;
+        btn.className = `status-filter-btn px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${isSel ? 'bg-slate-800 text-white border border-slate-700' : 'text-slate-400 hover:text-slate-200'}`;
+      });
+      renderFeedItems();
+    }
+
+    function renderMapPins(bldgFilter) {
+      const container = document.getElementById('map-pins-container');
+      const filtered = itemsData.filter(item => bldgFilter === 'ALL' || item.buildingId === bldgFilter);
+
+      container.innerHTML = filtered.map(item => {
+        const isGreen = item.status === 'AT_SECURITY';
+        return `
+          <div onclick="showMapPopup('${item.id}')" style="left: ${item.coords.x}%; top: ${item.coords.y}%;" class="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group">
+            <div class="relative">
+              <span class="absolute -inset-2 rounded-full opacity-75 animate-ping ${isGreen ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
+              <div class="relative w-8 h-8 rounded-full flex items-center justify-center border-2 shadow-xl transition-transform group-hover:scale-125 ${isGreen ? 'bg-emerald-950 border-emerald-400 text-emerald-400' : 'bg-rose-950 border-rose-400 text-rose-400'}">
+                <i class="fa-solid fa-location-dot text-sm"></i>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showMapPopup(id) {
+      const item = itemsData.find(i => i.id === id);
+      if (!item) return;
+
+      const card = document.getElementById('map-popup-card');
+      card.className = 'absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-full max-w-sm px-4';
+      card.innerHTML = `
+        <div class="bg-slate-900/95 border border-slate-700 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-3 relative">
+          <button onclick="document.getElementById('map-popup-card').classList.add('hidden')" class="absolute top-3 right-3 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div class="flex gap-3">
+            <img src="${item.image}" class="w-16 h-16 rounded-xl object-cover border border-slate-800">
+            <div class="flex-1 pr-4">
+              <span class="text-[9px] font-mono bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">#${item.id}</span>
+              <h4 class="font-bold text-xs text-white line-clamp-1 mt-0.5">${item.title}</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot text-rose-400"></i> ${item.location}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openDetailModal('${item.id}')" class="flex-1 bg-slate-800 text-white text-xs font-semibold py-1.5 rounded-lg">Details</button>
+            ${item.status === 'AT_SECURITY' ? `<button onclick="openClaimModal('${item.id}')" class="flex-1 bg-emerald-500 text-slate-950 font-bold text-xs py-1.5 rounded-lg">Claim OTP</button>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function simulateOCRScan() {
+      document.getElementById('ocr-loading').classList.remove('hidden');
+      document.getElementById('ocr-result').classList.add('hidden');
+
+      setTimeout(() => {
+        document.getElementById('ocr-loading').classList.add('hidden');
+        document.getElementById('ocr-result').classList.remove('hidden');
+      }, 1800);
+    }
+
+    function dispatchCampusEmail() {
+      document.getElementById('email-dispatch-box').innerHTML = `
+        <div class="bg-emerald-950/40 border border-emerald-500/50 p-4 rounded-xl text-center space-y-1">
+          <i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+          <h4 class="font-bold text-xs text-emerald-300">Notification Email Dispatched!</h4>
+          <p class="text-[11px] text-slate-400">Student notified at ra2111003010198@srmist.edu.in with claim pass.</p>
+        </div>
+      `;
+      showToast('Dispatch confirmed to official SRM email!');
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('admin-table-body');
+      tbody.innerHTML = itemsData.map(item => `
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="p-3.5 font-mono text-cyan-400">#${item.id}</td>
+          <td class="p-3.5 font-semibold text-white">${item.title}</td>
+          <td class="p-3.5 text-slate-300">${item.dropoffHub}</td>
+          <td class="p-3.5 font-mono text-[10px]">
+            ${item.status === 'AT_SECURITY' ? '<span class="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">In Vault</span>' : '<span class="text-slate-400">Closed</span>'}
+          </td>
+          <td class="p-3.5">
+            ${item.status === 'AT_SECURITY' ? `<button onclick="openClaimModal('${item.id}')" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-mono px-2.5 py-1 rounded-lg border border-emerald-500/40">Verify OTP Handover</button>` : '—'}
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('vault-count').innerText = `Total Vault Items: ${itemsData.filter(i=>i.status==='AT_SECURITY').length}`;
+    }
+
+    function handleGuardLogSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('guard-item-title').value;
+      const bldgKey = document.getElementById('guard-item-hub').value;
+      const bldg = SRM_BUILDINGS[bldgKey];
+
+      const newItem = {
+        id: `SRM-G${Math.floor(1000 + Math.random() * 9000)}`,
+        title,
+        category: 'Personal Belongings',
+        location: `${bldg.name} Security Desk`,
+        buildingId: bldgKey,
+        status: 'AT_SECURITY',
+        dropoffHub: `${bldg.code} Security Desk (Ext ${bldg.ext})`,
+        finderName: 'Guard Desk Officer',
+        timestamp: 'Just now',
+        sensitiveInfo: false,
+        image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+        description: 'Logged directly via Guard Console.',
+        coords: bldg.coords
+      };
+
+      itemsData.unshift(newItem);
+      document.getElementById('guard-item-title').value = '';
+      renderAdminTable();
+      renderFeedItems();
+      showToast(`Item #${newItem.id} logged into SRM Security Vault!`);
+    }
+
+    function openQuickSnapModal() {
+      document.getElementById('quick-snap-modal').classList.remove('hidden');
+    }
+
+    function handleQuickSnapSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('qs-title').value;
+      const cat = document.getElementById('qs-category').value;
+      const bldgKey = document.getElementById('qs-landmark').value;
+      const loc = document.getElementById('qs-location').value;
+      const desc = document.getElementById('qs-desc').value;
+      const bldg = SRM_BUILDINGS[bldgKey];
+
+      const newItem = {
+        id: `SRM-${Math.floor(1000 + Math.random() * 9000)}`,
+        title,
+        category: cat,
+        location: `${bldg.name} - ${loc || 'General Spot'}`,
+        buildingId: bldgKey,
+        status: 'AT_SECURITY',
+        dropoffHub: `${bldg.code} Guard Desk`,
+        finderName: 'Student (@srmist.edu.in)',
+        timestamp: 'Just now',
+        sensitiveInfo: cat === 'ID & Documents',
+        image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+        description: desc || 'Quick Snap post.',
+        coords: bldg.coords
+      };
+
+      itemsData.unshift(newItem);
+      closeModal('quick-snap-modal');
+      renderFeedItems();
+      showToast(`Quick Snap published! Logged as #${newItem.id}`);
+    }
+
+    function openDetailModal(id) {
+      const item = itemsData.find(i => i.id === id);
+      if (!item) return;
+      activeSelectedItem = item;
+
+      document.getElementById('detail-item-id').innerText = `#${item.id}`;
+      document.getElementById('detail-item-title').innerText = item.title;
+      document.getElementById('detail-item-loc').innerText = item.location;
+      document.getElementById('detail-item-hub').innerText = item.dropoffHub;
+      document.getElementById('detail-item-desc').innerText = item.description;
+
+      const img = document.getElementById('detail-item-img');
+      img.src = item.image;
+      img.className = `w-full h-full object-cover ${item.sensitiveInfo ? 'blur-md opacity-60' : ''}`;
+
+      document.getElementById('detail-blur-toggle-btn').classList.toggle('hidden', !item.sensitiveInfo);
+      document.getElementById('item-detail-modal').classList.remove('hidden');
+    }
+
+    function toggleDetailBlur() {
+      const img = document.getElementById('detail-item-img');
+      img.classList.toggle('blur-md');
+      img.classList.toggle('opacity-60');
+    }
+
+    function openClaimModal(id) {
+      const item = itemsData.find(i => i.id === id);
+      if (!item) return;
+      activeSelectedItem = item;
+      document.getElementById('claim-ref-id').innerText = `Item Ref: #${item.id}`;
+      document.getElementById('claim-modal').classList.remove('hidden');
+    }
+
+    function openClaimModalFromDetail() {
+      closeModal('item-detail-modal');
+      if (activeSelectedItem) openClaimModal(activeSelectedItem.id);
+    }
+
+    function verifyClaimOtp() {
+      const input = document.getElementById('guard-otp-input').value.trim();
+      const err = document.getElementById('otp-error-msg');
+
+      if (input === '884209') {
+        err.classList.add('hidden');
+        if (activeSelectedItem) {
+          activeSelectedItem.status = 'RECOVERED';
+        }
+        closeModal('claim-modal');
+        userKarma += 50;
+        document.getElementById('user-karma-display').innerText = `${userKarma} PTS`;
+        document.getElementById('karma-vault-points').innerText = `${userKarma} PTS`;
+        renderFeedItems();
+        showToast('Claim Verified! +50 Karma Points credited to student account.');
+      } else {
+        err.classList.remove('hidden');
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Initialize application on window load
+    window.onload = function() {
+      renderFeedItems();
+    };
+  </script>
+</body>
+</html>
