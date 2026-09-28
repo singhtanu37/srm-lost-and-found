@@ -1,0 +1,1864 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Shield, MapPin, Sparkles, Clock, Search, Plus, CheckCircle2,
+  AlertTriangle, QrCode, Eye, EyeOff, Lock, Gift, Building, Phone,
+  ArrowRight, UserCheck, BarChart3, ScanLine, TrendingUp, X, Filter,
+  Award, Terminal, Send, ChevronRight, Copy, Check, RefreshCw, Zap,
+  Compass, Radio, AlertCircle, Share2, MessageSquare, ShieldCheck,
+  User, CheckCircle, Flame
+} from 'lucide-react';
+
+// SRM Institute of Science and Technology - Kattankulathur Campus Landmarks
+const SRM_BUILDINGS = [
+  { id: 'ub', name: 'University Building (UB)', code: 'UB', ext: '401', coords: { x: 42, y: 38 } },
+  { id: 'tp', name: 'Tech Park (TP)', code: 'TP', ext: '402', coords: { x: 65, y: 28 } },
+  { id: 'lib', name: 'Central Library', code: 'LIB', ext: '403', coords: { x: 30, y: 55 } },
+  { id: 'java', name: 'Java Green Canteen', code: 'JAVA', ext: '404', coords: { x: 55, y: 62 } },
+  { id: 'arch', name: 'Arch Gate / Main Entrance', code: 'ARCH', ext: '405', coords: { x: 15, y: 80 } },
+  { id: 'hostel', name: 'Belagavi & MTP Hostels', code: 'HSTL', ext: '406', coords: { x: 80, y: 75 } }
+];
+
+const INITIAL_ITEMS = [
+  {
+    id: 'SRM-8891',
+    title: 'AirPods Pro (2nd Gen) with MagSafe Case',
+    category: 'Electronics',
+    location: 'Tech Park 3rd Floor - Lab 302',
+    buildingId: 'tp',
+    status: 'AT_SECURITY', // AT_SECURITY, ACTIVE_LOST, RECOVERED
+    dropoffType: 'Handed to Security Guard',
+    dropoffHub: 'Tech Park Security Desk (Ext 402)',
+    finderName: 'Ananya R. (CSE 3rd Year)',
+    finderNetId: 'ar8842',
+    timestamp: '25 mins ago',
+    date: 'Sep 28, 2026',
+    sensitiveInfo: false,
+    image: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=600&q=80',
+    description: 'Found near Workstation 14 in TP Lab 302. Has a dark matte blue protective silicone case.',
+    coords: { x: 65, y: 28 },
+    guardContact: 'Officer M. Sundaram - Ext: 402',
+    handoverHistory: [
+      { time: '11:20 AM', title: 'Spotted by Ananya R.', desc: 'Item found on Lab 302 desk' },
+      { time: '11:28 AM', title: 'Handed to Tech Park Security', desc: 'Verified and logged into Vault' },
+      { time: '11:30 AM', title: 'Vault Escrow Active', desc: 'Awaiting student OTP claim' }
+    ]
+  },
+  {
+    id: 'SRM-8892',
+    title: 'SRM Student ID Card (Reg: RA2111003010198)',
+    category: 'ID & Documents',
+    location: 'Central Library 2nd Floor Reading Room',
+    buildingId: 'lib',
+    status: 'AT_SECURITY',
+    dropoffType: 'Left at Library Counter',
+    dropoffHub: 'Library Gate Security Desk (Ext 403)',
+    finderName: 'Library Guard K. Ram',
+    finderNetId: 'kr1049',
+    timestamp: '1 hour ago',
+    date: 'Sep 28, 2026',
+    sensitiveInfo: true,
+    netIdExtracted: 'ra2111003010198',
+    studentNameExtracted: 'Siddharth V.',
+    image: 'https://images.unsplash.com/photo-1578836537282-3171d77f8632?auto=format&fit=crop&w=600&q=80',
+    description: 'B.Tech IT Student ID card with blue lanyard. Found near silent study cubicle #12.',
+    coords: { x: 30, y: 55 },
+    guardContact: 'Officer K. Ram - Ext: 403',
+    handoverHistory: [
+      { time: '10:45 AM', title: 'Spotted by Janitor', desc: 'Left on desk #12' },
+      { time: '10:50 AM', title: 'Received at Library Front Desk', desc: 'Auto-OCR scan completed' }
+    ]
+  },
+  {
+    id: 'SRM-8893',
+    title: 'Matte Blue Leather Wallet with Cards',
+    category: 'Personal Belongings',
+    location: 'Java Green Canteen Bench',
+    buildingId: 'java',
+    status: 'ACTIVE_LOST',
+    dropoffType: 'Left on Spot',
+    dropoffHub: 'Unclaimed / Active Search',
+    finderName: 'Priya S.',
+    finderNetId: 'ps4412',
+    timestamp: '2 hours ago',
+    date: 'Sep 28, 2026',
+    sensitiveInfo: true,
+    image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80',
+    description: 'Lost wallet containing driver license and campus dining pass. Urgent!',
+    coords: { x: 55, y: 62 },
+    guardContact: 'Java Green Security Post - Ext: 404',
+    handoverHistory: [
+      { time: '09:40 AM', title: 'Loss Reported by Owner', desc: 'Broadcasted to campus network' }
+    ]
+  },
+  {
+    id: 'SRM-8894',
+    title: 'Casio G-Shock Matte Black Watch',
+    category: 'Accessories',
+    location: 'Arch Gate Bus Shuttle Stop',
+    buildingId: 'arch',
+    status: 'AT_SECURITY',
+    dropoffType: 'Handed to Security Guard',
+    dropoffHub: 'Main Gate Security Gatepost',
+    finderName: 'Security Guard Suresh',
+    finderNetId: 'sg9021',
+    timestamp: '3 hours ago',
+    date: 'Sep 28, 2026',
+    sensitiveInfo: false,
+    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
+    description: 'Found on seat #3 at the campus shuttle shelter. Scratched bezel.',
+    coords: { x: 15, y: 80 },
+    guardContact: 'Main Gate Guard Desk - Ext: 405',
+    handoverHistory: [
+      { time: '08:30 AM', title: 'Found by Shuttle Attendant', desc: 'Logged at Main Security Gate' }
+    ]
+  },
+  {
+    id: 'SRM-8895',
+    title: 'Dell XPS 130W USB-C Power Adapter',
+    category: 'Electronics',
+    location: 'UB 2nd Floor Room 204',
+    buildingId: 'ub',
+    status: 'ACTIVE_LOST',
+    dropoffType: 'Left on Spot',
+    dropoffHub: 'Unclaimed',
+    finderName: 'Karthik M.',
+    finderNetId: 'km1209',
+    timestamp: '5 hours ago',
+    date: 'Sep 28, 2026',
+    sensitiveInfo: false,
+    image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=600&q=80',
+    description: 'Black charger with thick rubber cord left connected under back row desk.',
+    coords: { x: 42, y: 38 },
+    guardContact: 'UB Ground Desk - Ext: 401',
+    handoverHistory: [
+      { time: '06:50 AM', title: 'Reported Missing', desc: 'Awaiting finder report' }
+    ]
+  }
+];
+
+export default function App() {
+  // Navigation State
+  const [activeTab, setActiveTab] = useState('feed'); // 'feed', 'map', 'idscanner', 'admin', 'analytics', 'karma'
+  
+  // Data States
+  const [items, setItems] = useState(INITIAL_ITEMS);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [buildingFilter, setBuildingFilter] = useState('ALL');
+
+  // Interactive Modals
+  const [selectedItem, setSelectedItem] = useState(null); // Detail Drawer Modal
+  const [isQuickSnapOpen, setIsQuickSnapOpen] = useState(false); // 15-sec upload
+  const [claimModalItem, setClaimModalItem] = useState(null); // OTP Escrow Claim
+  const [karmaRewardModal, setKarmaRewardModal] = useState(null); // Celebration popup
+
+  // User Karma & Safeguards
+  const [userKarma, setUserKarma] = useState(150);
+  const [monthlyReturnCount, setMonthlyReturnCount] = useState(1); // Cap is 2 per month
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Auto Dismiss Toast
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  // Filtered Feed Items
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            item.id.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === 'ALL' || item.category === categoryFilter;
+      const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+      const matchesBuilding = buildingFilter === 'ALL' || item.buildingId === buildingFilter;
+      return matchesSearch && matchesCategory && matchesStatus && matchesBuilding;
+    });
+  }, [items, searchQuery, categoryFilter, statusFilter, buildingFilter]);
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black pb-16">
+      
+      {/* GLOBAL BACKGROUND GLOWS */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/3 -right-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-rose-500/10 rounded-full blur-[120px]" />
+      </div>
+
+      {/* DYNAMIC TOP TICKER BAR */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border-b border-slate-800/80 text-xs py-2 px-4 relative z-20 overflow-hidden backdrop-blur-md">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2 overflow-hidden w-full sm:w-auto">
+            <span className="flex h-2 w-2 relative flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="font-semibold text-emerald-400 uppercase tracking-wider text-[10px] bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              LIVE HUB TICKER
+            </span>
+            <p className="text-slate-300 truncate text-[11px] font-mono">
+              🎉 3 AirPods, 1 Student ID & 1 Wallet safely recovered today at UB & Tech Park Desks!
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 text-slate-400 text-[11px] flex-shrink-0">
+            <span className="flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-0.5 rounded-full border border-emerald-500/30 text-emerald-400 font-mono">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              @srmist.edu.in Verified
+            </span>
+            <span className="hidden md:inline text-slate-500">|</span>
+            <span className="hidden md:flex items-center gap-1 font-mono text-amber-400">
+              <Flame className="w-3.5 h-3.5" />
+              Karma Balance: <strong className="text-white">{userKarma} PTS</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN HEADER NAVBAR */}
+      <header className="sticky top-0 z-30 bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-800/80 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            
+            {/* BRAND LOGO */}
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('feed')}>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-indigo-600 p-[1px] shadow-lg shadow-emerald-500/20">
+                <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
+                  <Compass className="w-5 h-5 text-emerald-400 animate-pulse" />
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                    SRM LOST & FOUND
+                  </h1>
+                  <span className="text-[9px] bg-cyan-500/10 text-cyan-400 font-mono px-1.5 py-0.2 rounded border border-cyan-500/30">
+                    KTR HUB
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 font-mono">Kattankulathur Campus Security Network</p>
+              </div>
+            </div>
+
+            {/* TAB NAVIGATION DESKTOP */}
+            <nav className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+              <button
+                onClick={() => setActiveTab('feed')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'feed'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Radio className="w-3.5 h-3.5" />
+                Main Feed
+              </button>
+
+              <button
+                onClick={() => setActiveTab('map')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'map'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                Campus Map
+              </button>
+
+              <button
+                onClick={() => setActiveTab('idscanner')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'idscanner'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <ScanLine className="w-3.5 h-3.5" />
+                ID Card AI Scanner
+              </button>
+
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'admin'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Guard Desk Portal
+              </button>
+
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'analytics'
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                Analytics & Heatmap
+              </button>
+
+              <button
+                onClick={() => setActiveTab('karma')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'karma'
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Award className="w-3.5 h-3.5" />
+                Karma Vault
+              </button>
+            </nav>
+
+            {/* ACTION CTA BUTTONS */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsQuickSnapOpen(true)}
+                className="relative group overflow-hidden rounded-xl p-[1px] focus:outline-none"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-400 rounded-xl animate-gradient-x" />
+                <div className="relative px-3.5 py-2 rounded-[11px] bg-slate-950 flex items-center gap-2 transition-all group-hover:bg-transparent">
+                  <Plus className="w-4 h-4 text-emerald-400 group-hover:text-black transition-colors" />
+                  <span className="text-xs font-bold text-white group-hover:text-black transition-colors hidden sm:inline">
+                    + Quick Snap (15s)
+                  </span>
+                  <span className="text-xs font-bold text-white sm:hidden">Post</span>
+                </div>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* MOBILE NAVIGATION TABS BAR */}
+        <div className="lg:hidden flex overflow-x-auto border-t border-slate-800/80 px-2 py-1.5 gap-1 no-scrollbar bg-slate-950/90">
+          {[
+            { id: 'feed', label: 'Feed', icon: Radio },
+            { id: 'map', label: 'Campus Map', icon: MapPin },
+            { id: 'idscanner', label: 'ID AI Scan', icon: ScanLine },
+            { id: 'admin', label: 'Guard Desk', icon: Shield },
+            { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+            { id: 'karma', label: 'Karma Perks', icon: Award }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : 'text-slate-400'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </header>
+
+      {/* TOAST NOTIFICATION CONTAINER */}
+      {toastMessage && (
+        <div className="fixed top-20 right-4 z-50 animate-bounce">
+          <div className="bg-slate-900 text-slate-100 border border-emerald-500/50 shadow-2xl shadow-emerald-500/20 px-4 py-3 rounded-xl flex items-center gap-3 backdrop-blur-xl max-w-md">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <p className="text-xs font-medium">{toastMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* MAIN CONTENT AREA CONTAINER */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+        {/* 1. LAYER 1: MAIN CARD FEED VIEW */}
+        {activeTab === 'feed' && (
+          <div className="space-y-6">
+            
+            {/* FEED SEARCH & FILTERS BAR */}
+            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 backdrop-blur-md space-y-4 shadow-xl">
+              <div className="flex flex-col md:flex-row gap-3">
+                {/* Search Bar */}
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by item name, ID number, or landmark (e.g. AirPods, TP 3rd floor)..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Building Quick Selector */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+                  <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 flex-shrink-0">
+                    <Filter className="w-3 h-3 text-emerald-400" /> Building:
+                  </span>
+                  <button
+                    onClick={() => setBuildingFilter('ALL')}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 ${
+                      buildingFilter === 'ALL'
+                        ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-slate-950 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    All SRM Campus
+                  </button>
+                  {SRM_BUILDINGS.map(b => (
+                    <button
+                      key={b.id}
+                      onClick={() => setBuildingFilter(b.id)}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all flex-shrink-0 ${
+                        buildingFilter === b.id
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                          : 'bg-slate-950 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {b.code}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status & Category Filters */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  <span className="text-[11px] font-mono text-slate-400">Status:</span>
+                  {[
+                    { id: 'ALL', label: 'All Items' },
+                    { id: 'AT_SECURITY', label: '🛡️ At Guard Desk (Vault)' },
+                    { id: 'ACTIVE_LOST', label: '⚡ Active Lost' },
+                    { id: 'RECOVERED', label: '✅ Recovered' }
+                  ].map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setStatusFilter(s.id)}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                        statusFilter === s.id
+                          ? 'bg-slate-800 text-white border border-slate-700'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+
+                <p className="text-[11px] font-mono text-slate-500">
+                  Showing <span className="text-emerald-400 font-bold">{filteredItems.length}</span> active listings
+                </p>
+              </div>
+            </div>
+
+            {/* CARDS GRID DISPLAY */}
+            {filteredItems.length === 0 ? (
+              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
+                <AlertCircle className="w-10 h-10 text-slate-600 mx-auto" />
+                <h3 className="text-sm font-semibold text-slate-300">No matching lost or found items</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Try adjusting your building filter or search query. If you lost an item, post a Quick Snap to alert campus security.
+                </p>
+                <button
+                  onClick={() => setIsQuickSnapOpen(true)}
+                  className="mt-2 inline-flex items-center gap-2 bg-emerald-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl hover:bg-emerald-400 transition-colors"
+                >
+                  + Post Quick Snap
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredItems.map(item => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    onOpenDetail={() => setSelectedItem(item)}
+                    onInitiateClaim={() => setClaimModalItem(item)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 2. CAMPUS INTERACTIVE MAP TAB */}
+        {activeTab === 'map' && (
+          <CampusMapSection
+            items={items}
+            onSelectItem={(item) => setSelectedItem(item)}
+            onInitiateClaim={(item) => setClaimModalItem(item)}
+          />
+        )}
+
+        {/* 3. ID CARD AI AUTO-FINDER TAB */}
+        {activeTab === 'idscanner' && (
+          <IDScannerSection
+            onAutoFound={(extractedNetId) => {
+              showToast(`Auto-Matched ID: Email dispatch simulated to ${extractedNetId}@srmist.edu.in!`);
+            }}
+          />
+        )}
+
+        {/* 4. SECURITY GUARD / HUB ADMIN PORTAL TAB */}
+        {activeTab === 'admin' && (
+          <GuardDeskAdminSection
+            items={items}
+            onAddNewItem={(newItem) => {
+              setItems([newItem, ...items]);
+              showToast(`Logged item ${newItem.id} into SRM Vault Security Desk!`);
+            }}
+            onVerifyClaim={(itemId) => {
+              setItems(items.map(it => it.id === itemId ? { ...it, status: 'RECOVERED' } : it));
+              showToast(`Item ${itemId} verified and handed over!`);
+            }}
+          />
+        )}
+
+        {/* 5. ANALYTICS & LOSS HEATMAP TAB */}
+        {activeTab === 'analytics' && (
+          <AnalyticsHeatmapSection items={items} />
+        )}
+
+        {/* 6. KARMA VAULT PERKS TAB */}
+        {activeTab === 'karma' && (
+          <KarmaVaultSection
+            userKarma={userKarma}
+            monthlyReturnCount={monthlyReturnCount}
+          />
+        )}
+
+      </main>
+
+      {/* ----------------- MODALS LAYER ----------------- */}
+
+      {/* LAYER 2: INTERACTIVE DRILL-DOWN ITEM MODAL */}
+      {selectedItem && (
+        <ItemDetailDrawerModal
+          item={selectedItem}
+          onClose={() => setSelectedItem(null)}
+          onClaimClick={() => {
+            const itemToClaim = selectedItem;
+            setSelectedItem(null);
+            setClaimModalItem(itemToClaim);
+          }}
+        />
+      )}
+
+      {/* FAST 15-SECOND QUICK-SNAP FORM MODAL */}
+      {isQuickSnapOpen && (
+        <QuickSnapModal
+          onClose={() => setIsQuickSnapOpen(false)}
+          onSubmit={(newItem) => {
+            setItems([newItem, ...items]);
+            setIsQuickSnapOpen(false);
+            showToast(`Quick Snap Published! Item #${newItem.id} logged.`);
+          }}
+        />
+      )}
+
+      {/* OTP ESCROW CLAIM MODAL */}
+      {claimModalItem && (
+        <ClaimVaultModal
+          item={claimModalItem}
+          onClose={() => setClaimModalItem(null)}
+          onSuccessVerified={(karmaEarned) => {
+            // Update item status in global list
+            setItems(items.map(it => it.id === claimModalItem.id ? { ...it, status: 'RECOVERED' } : it));
+            setClaimModalItem(null);
+            
+            // Credit Karma and check monthly cap
+            if (monthlyReturnCount < 2) {
+              setUserKarma(prev => prev + karmaEarned);
+              setMonthlyReturnCount(prev => prev + 1);
+              setKarmaRewardModal({ points: karmaEarned });
+            } else {
+              showToast("Item marked Recovered! (Monthly Karma reward cap of 2 reached)");
+            }
+          }}
+        />
+      )}
+
+      {/* KARMA LEVEL UP CELEBRATION MODAL */}
+      {karmaRewardModal && (
+        <KarmaLevelUpModal
+          points={karmaRewardModal.points}
+          monthlyCount={monthlyReturnCount}
+          onClose={() => setKarmaRewardModal(null)}
+        />
+      )}
+
+    </div>
+  );
+}
+
+function ItemCard({ item, onOpenDetail, onInitiateClaim }) {
+  const [isBlurred, setIsBlurred] = useState(item.sensitiveInfo);
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'AT_SECURITY':
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <Shield className="w-3 h-3 text-emerald-400" /> At Security Desk
+          </span>
+        );
+      case 'ACTIVE_LOST':
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30">
+            <AlertTriangle className="w-3 h-3 text-rose-400" /> Active Lost
+          </span>
+        );
+      case 'RECOVERED':
+        return (
+          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+            <CheckCircle2 className="w-3 h-3 text-cyan-400" /> Recovered & Closed
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="group relative bg-slate-900/70 border border-slate-800 hover:border-slate-700 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-1 flex flex-col">
+      
+      {/* CARD IMAGE CONTAINER WITH SENSITIVE INFO AUTO-BLUR TOGGLE */}
+      <div className="relative h-48 w-full bg-slate-950 overflow-hidden">
+        <img
+          src={item.image}
+          alt={item.title}
+          className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+            isBlurred ? 'blur-md scale-110 opacity-70' : ''
+          }`}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+
+        {/* SENSITIVE INFO BLUR OVERLAY TAG */}
+        {item.sensitiveInfo && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsBlurred(!isBlurred);
+            }}
+            className="absolute top-3 right-3 bg-slate-950/80 backdrop-blur-md text-xs px-2.5 py-1 rounded-lg border border-slate-700/80 flex items-center gap-1.5 text-slate-300 hover:text-white hover:border-slate-500 transition-all z-10"
+            title="Toggle sensitive document privacy blur"
+          >
+            {isBlurred ? (
+              <>
+                <EyeOff className="w-3.5 h-3.5 text-rose-400" />
+                <span className="text-[10px] font-mono">Auto-Blurred</span>
+              </>
+            ) : (
+              <>
+                <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[10px] font-mono">Unmasked</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* STATUS & CATEGORY BADGES */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+          {getStatusBadge(item.status)}
+        </div>
+
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-slate-300 z-10">
+          <span className="bg-slate-900/90 backdrop-blur-md px-2 py-0.5 rounded font-mono text-[10px] text-cyan-300 border border-slate-800">
+            #{item.id}
+          </span>
+          <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+            <Clock className="w-3 h-3 text-slate-400" /> {item.timestamp}
+          </span>
+        </div>
+      </div>
+
+      {/* CARD BODY CONTENT */}
+      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+        <div>
+          <h3 className="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
+            {item.title}
+          </h3>
+          <p className="text-xs text-slate-400 flex items-center gap-1 mt-1 font-sans">
+            <MapPin className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+            <span className="truncate">{item.location}</span>
+          </p>
+        </div>
+
+        {/* DROP OFF HUB INDICATOR */}
+        <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 text-[11px] space-y-1 font-mono">
+          <div className="text-slate-400 flex justify-between">
+            <span>Location Hub:</span>
+            <span className="text-slate-200">{item.dropoffHub}</span>
+          </div>
+          <div className="text-slate-400 flex justify-between">
+            <span>Logged By:</span>
+            <span className="text-emerald-400">{item.finderName}</span>
+          </div>
+        </div>
+
+        {/* CARD ACTION BUTTONS */}
+        <div className="pt-2 flex items-center gap-2">
+          <button
+            onClick={onOpenDetail}
+            className="flex-1 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2 rounded-xl transition-all border border-slate-700/50 flex items-center justify-center gap-1"
+          >
+            Details
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+
+          {item.status === 'AT_SECURITY' && (
+            <button
+              onClick={onInitiateClaim}
+              className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-2 rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              Claim OTP
+            </button>
+          )}
+
+          {item.status === 'ACTIVE_LOST' && (
+            <button
+              onClick={onOpenDetail}
+              className="flex-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-xs py-2 rounded-xl transition-all border border-rose-500/30 flex items-center justify-center gap-1"
+            >
+              I Found This
+            </button>
+          )}
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+function ItemDetailDrawerModal({ item, onClose, onClaimClick }) {
+  const [unmaskImage, setUnmaskImage] = useState(!item.sensitiveInfo);
+  const [copiedId, setCopiedId] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(item.id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        {/* MODAL HEADER */}
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded">
+              #{item.id}
+            </span>
+            <h2 className="font-bold text-sm text-white truncate max-w-md">{item.title}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* MODAL BODY SCROLLABLE */}
+        <div className="p-6 overflow-y-auto space-y-6">
+          
+          {/* HIGH-RES IMAGE PREVIEW WITH AUTO BLUR TOGGLE */}
+          <div className="relative h-64 w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
+            <img
+              src={item.image}
+              alt={item.title}
+              className={`w-full h-full object-cover ${!unmaskImage ? 'blur-lg opacity-60 scale-105' : ''}`}
+            />
+            
+            {item.sensitiveInfo && (
+              <div className="absolute top-3 right-3 z-10">
+                <button
+                  onClick={() => setUnmaskImage(!unmaskImage)}
+                  className="bg-slate-900/90 text-white text-xs px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-2 shadow-lg backdrop-blur-md"
+                >
+                  {unmaskImage ? <EyeOff className="w-4 h-4 text-rose-400" /> : <Eye className="w-4 h-4 text-emerald-400" />}
+                  {unmaskImage ? 'Blur Sensitive Info' : 'Unmask Document'}
+                </button>
+              </div>
+            )}
+
+            <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-mono text-slate-300 border border-slate-800">
+              Logged on {item.date} • {item.timestamp}
+            </div>
+          </div>
+
+          {/* ITEM DETAILS METADATA GRID */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 uppercase">Campus Location Landmark</span>
+              <p className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-rose-400" />
+                {item.location}
+              </p>
+            </div>
+
+            <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono text-slate-400 uppercase">Current Drop-off Hub</span>
+              <p className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-emerald-400" />
+                {item.dropoffHub}
+              </p>
+            </div>
+          </div>
+
+          {/* ITEM DESCRIPTION */}
+          <div className="bg-slate-900/40 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <h4 className="text-xs font-mono text-slate-400 uppercase">Item Description & Physical Tags</h4>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">{item.description}</p>
+          </div>
+
+          {/* SECURE CHAIN OF CUSTODY HANDOVER HISTORY */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-mono text-slate-400 uppercase flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+              Chain of Custody Log (Timestamps)
+            </h4>
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+              {item.handoverHistory.map((step, idx) => (
+                <div key={idx} className="flex gap-3 text-xs relative">
+                  {idx !== item.handoverHistory.length - 1 && (
+                    <div className="absolute left-[7px] top-4 bottom-0 w-[2px] bg-slate-800" />
+                  )}
+                  <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-200">{step.title}</span>
+                      <span className="text-[10px] font-mono text-slate-500">{step.time}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* SECURITY GUARD DIRECT DESK CONTACT */}
+          <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                <Phone className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <h5 className="text-xs font-bold text-emerald-300">Designated Security Desk</h5>
+                <p className="text-[11px] text-slate-400 font-mono">{item.guardContact}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleCopy}
+              className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1.5 transition-colors"
+            >
+              {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedId ? 'Copied ID' : 'Copy Ref ID'}
+            </button>
+          </div>
+
+        </div>
+
+        {/* MODAL FOOTER FAST ACTION BUTTONS */}
+        <div className="p-4 border-t border-slate-800 bg-slate-900/80 flex items-center gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          >
+            Close
+          </button>
+
+          {item.status === 'AT_SECURITY' && (
+            <button
+              onClick={onClaimClick}
+              className="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+            >
+              <QrCode className="w-4 h-4" />
+              Claim via OTP Escrow Pass
+            </button>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+function QuickSnapModal({ onClose, onSubmit }) {
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('Electronics');
+  const [landmark, setLandmark] = useState('tp');
+  const [locationDetails, setLocationDetails] = useState('');
+  const [dropoffType, setDropoffType] = useState('Handed to Security Guard');
+  const [description, setDescription] = useState('');
+  const [photoPreview, setPhotoPreview] = useState('https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    const buildingObj = SRM_BUILDINGS.find(b => b.id === landmark) || SRM_BUILDINGS[0];
+
+    const newItem = {
+      id: `SRM-${Math.floor(1000 + Math.random() * 9000)}`,
+      title,
+      category,
+      location: `${buildingObj.name} - ${locationDetails || 'General Area'}`,
+      buildingId: landmark,
+      status: dropoffType === 'Left on Spot' ? 'ACTIVE_LOST' : 'AT_SECURITY',
+      dropoffType,
+      dropoffHub: `${buildingObj.code} Guard Desk (Ext ${buildingObj.ext})`,
+      finderName: 'Current Student (@srmist.edu.in)',
+      finderNetId: 'verified_usr',
+      timestamp: 'Just now',
+      date: 'Sep 28, 2026',
+      sensitiveInfo: category === 'ID & Documents',
+      image: photoPreview,
+      description: description || 'No extra notes specified.',
+      coords: buildingObj.coords,
+      guardContact: `${buildingObj.name} Security Guard - Ext: ${buildingObj.ext}`,
+      handoverHistory: [
+        { time: 'Just now', title: 'Quick Snap Published', desc: 'Item uploaded to SRM Lost & Found Hub' }
+      ]
+    };
+
+    onSubmit(newItem);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+        
+        {/* MODAL HEADER */}
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <h2 className="font-bold text-sm text-white">⚡ 15-Second Quick-Snap Post</h2>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* FORM BODY */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+          
+          {/* PHOTO PICKER MOCK */}
+          <div>
+            <label className="block text-xs font-mono text-slate-400 mb-1.5">1-Tap Item Photo</label>
+            <div className="flex items-center gap-3">
+              <img src={photoPreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border border-slate-800" />
+              <button
+                type="button"
+                onClick={() => {
+                  const samples = [
+                    'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=600&q=80',
+                    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80'
+                  ];
+                  setPhotoPreview(samples[Math.floor(Math.random() * samples.length)]);
+                }}
+                className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs rounded-xl border border-slate-700 flex items-center gap-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-emerald-400" /> Cycle Photo Sample
+              </button>
+            </div>
+          </div>
+
+          {/* ITEM NAME */}
+          <div>
+            <label className="block text-xs font-mono text-slate-400 mb-1">Item Title / Name *</label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Black Titan Keychain or Sony Headphones"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          {/* CATEGORY & SRM LANDMARK DROPDOWNS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-mono text-slate-400 mb-1">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                <option>Electronics</option>
+                <option>ID & Documents</option>
+                <option>Personal Belongings</option>
+                <option>Accessories</option>
+                <option>Books & Stationeries</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-mono text-slate-400 mb-1">SRM Landmark *</label>
+              <select
+                value={landmark}
+                onChange={(e) => setLandmark(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+              >
+                {SRM_BUILDINGS.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* LOCATION DETAILS */}
+          <div>
+            <label className="block text-xs font-mono text-slate-400 mb-1">Exact Spot / Floor</label>
+            <input
+              type="text"
+              value={locationDetails}
+              onChange={(e) => setLocationDetails(e.target.value)}
+              placeholder="e.g., 3rd Floor Lab 304 near window"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          {/* PRE-SET DROPOFF RADIO BUTTONS */}
+          <div>
+            <label className="block text-xs font-mono text-slate-400 mb-2">Drop-off Action Taken</label>
+            <div className="space-y-2">
+              {[
+                'Handed to Security Guard',
+                'Left at Library Counter',
+                'Left on Spot'
+              ].map((option) => (
+                <label key={option} className="flex items-center gap-2.5 cursor-pointer bg-slate-950 p-2.5 rounded-xl border border-slate-800 hover:border-slate-700">
+                  <input
+                    type="radio"
+                    name="dropoffType"
+                    checked={dropoffType === option}
+                    onChange={() => setDropoffType(option)}
+                    className="accent-emerald-500"
+                  />
+                  <span className="text-xs text-slate-200">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* DESCRIPTION */}
+          <div>
+            <label className="block text-xs font-mono text-slate-400 mb-1">Brief Description</label>
+            <textarea
+              rows="2"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Add key features, color, brand, or identifiable marks..."
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 resize-none"
+            />
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <div className="pt-2">
+            <button
+              type="submit"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+            >
+              <Zap className="w-4 h-4 fill-current" />
+              Publish Quick Snap Post Now
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  );
+}
+
+function CampusMapSection({ items, onSelectItem, onInitiateClaim }) {
+  const [selectedBuilding, setSelectedBuilding] = useState('ALL');
+  const [activePin, setActivePin] = useState(null);
+
+  const filteredMapItems = items.filter(item => {
+    return selectedBuilding === 'ALL' || item.buildingId === selectedBuilding;
+  });
+
+  return (
+    <div className="space-y-4">
+      
+      {/* MAP CONTROLS & BUILDING QUICK FILTER */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md">
+        <div>
+          <h2 className="font-bold text-sm text-white flex items-center gap-2">
+            <Compass className="w-4 h-4 text-emerald-400 animate-spin" style={{ animationDuration: '10s' }} />
+            SRM IST Kattankulathur Interactive Campus Map
+          </h2>
+          <p className="text-xs text-slate-400 font-mono">
+            Map Center: ~12.8231° N, 80.0442° E • Real-time Location Pins
+          </p>
+        </div>
+
+        {/* FAST BUILDING TOGGLE BUTTONS */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto no-scrollbar">
+          <button
+            onClick={() => setSelectedBuilding('ALL')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+              selectedBuilding === 'ALL'
+                ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20'
+                : 'bg-slate-950 text-slate-400 hover:text-white'
+            }`}
+          >
+            All Buildings
+          </button>
+          {SRM_BUILDINGS.map(b => (
+            <button
+              key={b.id}
+              onClick={() => setSelectedBuilding(b.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all flex-shrink-0 ${
+                selectedBuilding === b.id
+                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20'
+                  : 'bg-slate-950 text-slate-400 hover:text-white'
+              }`}
+            >
+              {b.code}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* MAP CANVAS DISPLAY CONTAINER */}
+      <div className="relative w-full h-[500px] bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        
+        {/* GRID PATTERN BACKDROP */}
+        <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
+
+        {/* SRM CAMPUS BUILDING VECTOR OUTLINES */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+          {/* Main Road Lines */}
+          <line x1="10%" y1="80%" x2="85%" y2="25%" stroke="#334155" strokeWidth="4" strokeDasharray="6 6" />
+          <line x1="40%" y1="10%" x2="40%" y2="90%" stroke="#334155" strokeWidth="3" />
+          
+          {/* Building Outlines */}
+          {SRM_BUILDINGS.map(b => (
+            <g key={b.id}>
+              <rect
+                x={`${b.coords.x - 5}%`}
+                y={`${b.coords.y - 4}%`}
+                width="10%"
+                height="8%"
+                rx="6"
+                fill="#0f172a"
+                stroke="#3b82f6"
+                strokeWidth="1.5"
+              />
+              <text
+                x={`${b.coords.x}%`}
+                y={`${b.coords.y + 1}%`}
+                fill="#94a3b8"
+                fontSize="10"
+                fontFamily="monospace"
+                textAnchor="middle"
+              >
+                {b.code}
+              </text>
+            </g>
+          ))}
+        </svg>
+
+        {/* MAP LEGEND */}
+        <div className="absolute top-4 left-4 z-10 bg-slate-900/90 border border-slate-800 backdrop-blur-md px-3 py-2 rounded-xl space-y-1.5 text-[11px] font-mono">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-slate-200">Green Pin = Dropped Safely at Vault</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+            <span className="text-slate-200">Orange Pin = Active Lost Item</span>
+          </div>
+        </div>
+
+        {/* DYNAMIC ITEM PINS */}
+        {filteredMapItems.map(item => {
+          const isGreen = item.status === 'AT_SECURITY';
+          return (
+            <div
+              key={item.id}
+              onClick={() => setActivePin(item)}
+              style={{ left: `${item.coords.x}%`, top: `${item.coords.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group"
+            >
+              <div className="relative">
+                {/* Glowing Pulse Ring */}
+                <span
+                  className={`absolute -inset-2 rounded-full opacity-75 animate-ping ${
+                    isGreen ? 'bg-emerald-400' : 'bg-rose-400'
+                  }`}
+                />
+                
+                {/* Pin Icon */}
+                <div
+                  className={`relative w-8 h-8 rounded-full flex items-center justify-center border-2 shadow-xl transition-transform group-hover:scale-125 ${
+                    isGreen
+                      ? 'bg-emerald-950 border-emerald-400 text-emerald-400'
+                      : 'bg-rose-950 border-rose-400 text-rose-400'
+                  }`}
+                >
+                  <MapPin className="w-4 h-4 fill-current" />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* INTERACTIVE POPUP CARD WHEN PIN IS CLICKED */}
+        {activePin && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-full max-w-sm px-4 animate-slideUp">
+            <div className="bg-slate-900/95 border border-slate-700 rounded-2xl p-4 shadow-2xl backdrop-blur-xl space-y-3 relative">
+              <button
+                onClick={() => setActivePin(null)}
+                className="absolute top-3 right-3 text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex gap-3">
+                <img src={activePin.image} alt="" className="w-16 h-16 rounded-xl object-cover border border-slate-800" />
+                <div className="flex-1 pr-4">
+                  <span className="text-[9px] font-mono bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">
+                    #{activePin.id}
+                  </span>
+                  <h4 className="font-bold text-xs text-white line-clamp-1 mt-0.5">{activePin.title}</h4>
+                  <p className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-rose-400" /> {activePin.location}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-slate-950 p-2 rounded-lg text-[10px] font-mono text-slate-300">
+                Contact: <strong className="text-emerald-400">{activePin.guardContact}</strong>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    onSelectItem(activePin);
+                    setActivePin(null);
+                  }}
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-1.5 rounded-lg"
+                >
+                  View Details
+                </button>
+                {activePin.status === 'AT_SECURITY' && (
+                  <button
+                    onClick={() => {
+                      onInitiateClaim(activePin);
+                      setActivePin(null);
+                    }}
+                    className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-1.5 rounded-lg"
+                  >
+                    Claim OTP
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+function IDScannerSection({ onAutoFound }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [extractedData, setExtractedData] = useState(null);
+  const [emailStatus, setEmailStatus] = useState('IDLE'); // IDLE, SENDING, SENT
+
+  const handleSimulatedUpload = () => {
+    setIsScanning(true);
+    setExtractedData(null);
+    setEmailStatus('IDLE');
+
+    setTimeout(() => {
+      setIsScanning(false);
+      setExtractedData({
+        netId: 'RA2111003010198',
+        studentName: 'Siddharth V.',
+        department: 'B.Tech IT - 3rd Year',
+        campusEmail: 'ra2111003010198@srmist.edu.in',
+        confidenceScore: '99.4%'
+      });
+    }, 2000);
+  };
+
+  const handleSendEmail = () => {
+    setEmailStatus('SENDING');
+    setTimeout(() => {
+      setEmailStatus('SENT');
+      if (onAutoFound && extractedData) {
+        onAutoFound(extractedData.netId);
+      }
+    }, 1800);
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+      
+      {/* SECTION HEADER */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center space-y-2 backdrop-blur-md">
+        <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+          <ScanLine className="w-6 h-6 animate-pulse" />
+        </div>
+        <h2 className="font-extrabold text-lg text-white">ID Card AI OCR Auto-Finder Engine</h2>
+        <p className="text-xs text-slate-400 max-w-lg mx-auto font-sans">
+          Upload an SRM Student ID photo. Our OCR vision model automatically extracts the NetID / Register Number and dispatches an instant recovery link to <code className="text-emerald-400 font-mono">netID@srmist.edu.in</code>.
+        </p>
+      </div>
+
+      {/* DRAG & DROP UPLOAD BOX */}
+      <div className="bg-slate-950 border-2 border-dashed border-slate-800 hover:border-emerald-500/50 rounded-2xl p-8 text-center transition-all cursor-pointer space-y-4">
+        <input
+          type="file"
+          accept="image/*"
+          id="id-upload"
+          className="hidden"
+          onChange={handleSimulatedUpload}
+        />
+        <label htmlFor="id-upload" className="cursor-pointer space-y-3 block">
+          <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-emerald-400">
+            <ScanLine className="w-7 h-7" />
+          </div>
+          <div>
+            <span className="text-xs font-bold text-emerald-400">Click to Select ID Card Photo</span>
+            <p className="text-[11px] text-slate-500 font-mono mt-0.5">Supports PNG, JPG, WEBP (Max 10MB)</p>
+          </div>
+        </label>
+      </div>
+
+      {/* SCANNING ANIMATION STATE */}
+      {isScanning && (
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 text-center space-y-3 animate-fadeIn">
+          <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
+          <p className="text-xs font-mono text-cyan-300">Scanning ID matrix & extracting NetID token...</p>
+        </div>
+      )}
+
+      {/* OCR EXTRACTED RESULTS DISPLAY */}
+      {extractedData && (
+        <div className="bg-slate-900/90 border border-emerald-500/40 rounded-2xl p-6 space-y-5 animate-slideUp">
+          
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <h3 className="font-bold text-sm text-white">OCR Extraction Successful</h3>
+            </div>
+            <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">
+              Confidence: {extractedData.confidenceScore}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span className="text-slate-500 block text-[10px]">EXTRACTED NETID</span>
+              <span className="text-emerald-400 font-bold text-sm">{extractedData.netId}</span>
+            </div>
+
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <span className="text-slate-500 block text-[10px]">STUDENT NAME</span>
+              <span className="text-slate-200 font-bold text-sm">{extractedData.studentName}</span>
+            </div>
+
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 sm:col-span-2">
+              <span className="text-slate-500 block text-[10px]">TARGET CAMPUS EMAIL</span>
+              <span className="text-cyan-400 font-bold text-xs">{extractedData.campusEmail}</span>
+            </div>
+          </div>
+
+          {/* DISPATCH ACTION & TERMINAL MOCK LOG */}
+          <div className="space-y-3 pt-2">
+            {emailStatus === 'IDLE' && (
+              <button
+                onClick={handleSendEmail}
+                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Dispatch Direct Recovery Link to {extractedData.campusEmail}
+              </button>
+            )}
+
+            {emailStatus === 'SENDING' && (
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-left font-mono text-[11px] text-slate-300 space-y-1">
+                <p className="text-cyan-400">&gt; Connecting to SRM SMTP Server (mail.srmist.edu.in)...</p>
+                <p className="text-emerald-400">&gt; Domain Lock: Verified @srmist.edu.in recipient</p>
+                <p className="text-slate-400">&gt; Transmitting encrypted OTP claim token...</p>
+              </div>
+            )}
+
+            {emailStatus === 'SENT' && (
+              <div className="bg-emerald-950/40 border border-emerald-500/50 p-4 rounded-xl text-center space-y-2">
+                <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto" />
+                <h4 className="font-bold text-xs text-emerald-300">Notification Email Dispatched!</h4>
+                <p className="text-[11px] text-slate-400 font-sans">
+                  The student has been notified via their official university email with a 1-click claim pass.
+                </p>
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+function GuardDeskAdminSection({ items, onAddNewItem, onVerifyClaim }) {
+  const [quickTitle, setQuickTitle] = useState('');
+  const [quickHub, setQuickHub] = useState('tp');
+
+  const handleQuickLog = (e) => {
+    e.preventDefault();
+    if (!quickTitle.trim()) return;
+
+    const buildingObj = SRM_BUILDINGS.find(b => b.id === quickHub) || SRM_BUILDINGS[0];
+
+    const newItem = {
+      id: `SRM-G${Math.floor(1000 + Math.random() * 9000)}`,
+      title: quickTitle,
+      category: 'Personal Belongings',
+      location: `${buildingObj.name} Security Desk`,
+      buildingId: quickHub,
+      status: 'AT_SECURITY',
+      dropoffType: 'Handed to Security Guard',
+      dropoffHub: `${buildingObj.code} Guard Desk`,
+      finderName: `Desk Guard (${buildingObj.code})`,
+      finderNetId: 'guard_admin',
+      timestamp: 'Just now',
+      date: 'Sep 28, 2026',
+      sensitiveInfo: false,
+      image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+      description: 'Logged directly via Guard Desk Admin Portal.',
+      coords: buildingObj.coords,
+      guardContact: `${buildingObj.name} Security - Ext: ${buildingObj.ext}`,
+      handoverHistory: [
+        { time: 'Just now', title: 'Guard Walk-in Entry', desc: 'Logged directly at Security Desk' }
+      ]
+    };
+
+    onAddNewItem(newItem);
+    setQuickTitle('');
+  };
+
+  return (
+    <div className="space-y-6">
+      
+      {/* GUARD DESK BANNER */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <Shield className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="font-extrabold text-base text-white">SRM Guard Desk / Hub Admin Console</h2>
+            <p className="text-xs text-slate-400 font-mono">
+              /admin/guard-desk • Fast Logging & Vault Custody
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-xl">
+            ● Active Guard Session: Guard Station #04
+          </span>
+        </div>
+      </div>
+
+      {/* 1-CLICK QUICK LOGGING PANEL */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <h3 className="font-bold text-xs text-slate-300 uppercase font-mono flex items-center gap-2">
+          <Plus className="w-4 h-4 text-emerald-400" /> 1-Click Guard Quick Item Log
+        </h3>
+
+        <form onSubmit={handleQuickLog} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            required
+            value={quickTitle}
+            onChange={(e) => setQuickTitle(e.target.value)}
+            placeholder="Item description (e.g. Blue Umbrella, Honda Bike Key)..."
+            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+          />
+
+          <select
+            value={quickHub}
+            onChange={(e) => setQuickHub(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+          >
+            {SRM_BUILDINGS.map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+
+          <button
+            type="submit"
+            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2 rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5"
+          >
+            Log to Vault
+          </button>
+        </form>
+      </div>
+
+      {/* VAULT INVENTORY TABLE VIEW */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+          <h3 className="font-bold text-xs text-white uppercase font-mono">Current Vault Inventory</h3>
+          <span className="text-[11px] font-mono text-slate-400">
+            Total Vault Items: {items.filter(i => i.status === 'AT_SECURITY').length}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-950 text-[10px] font-mono text-slate-400 border-b border-slate-800">
+                <th className="p-3.5">REF ID</th>
+                <th className="p-3.5">ITEM NAME</th>
+                <th className="p-3.5">DESK LOCATION</th>
+                <th className="p-3.5">STATUS</th>
+                <th className="p-3.5">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/80 text-xs">
+              {items.map(item => (
+                <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="p-3.5 font-mono text-cyan-400">#{item.id}</td>
+                  <td className="p-3.5 font-semibold text-white">{item.title}</td>
+                  <td className="p-3.5 text-slate-300">{item.dropoffHub}</td>
+                  <td className="p-3.5">
+                    {item.status === 'AT_SECURITY' && (
+                      <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
+                        In Vault
+                      </span>
+                    )}
+                    {item.status === 'RECOVERED' && (
+                      <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded border border-cyan-500/30">
+                        Handed Over
+                      </span>
+                    )}
+                    {item.status === 'ACTIVE_LOST' && (
+                      <span className="text-[10px] font-mono bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/30">
+                        Active Lost
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-3.5">
+                    {item.status === 'AT_SECURITY' && (
+                      <button
+                        onClick={() => onVerifyClaim(item.id)}
+                        className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-mono px-2.5 py-1 rounded-lg border border-emerald-500/40"
+                      >
+                        Verify OTP Handover
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+function AnalyticsHeatmapSection({ items }) {
+  return (
+    <div className="space-y-6">
+      
+      {/* STATS HIGHLIGHT CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-1 backdrop-blur-md">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Recovery Rate</span>
+          <p className="text-2xl font-extrabold text-emerald-400 font-mono">88.4%</p>
+          <p className="text-[11px] text-slate-500 font-sans">+12% higher than last semester</p>
+        </div>
+
+        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-1 backdrop-blur-md">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Avg Recovery Speed</span>
+          <p className="text-2xl font-extrabold text-cyan-400 font-mono">4.2 Hours</p>
+          <p className="text-[11px] text-slate-500 font-sans">Fastest via OTP Vault</p>
+        </div>
+
+        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-1 backdrop-blur-md">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Total Karma Tokens Rewarded</span>
+          <p className="text-2xl font-extrabold text-amber-400 font-mono">14,250 PTS</p>
+          <p className="text-[11px] text-slate-500 font-sans">Distributed to 285 finders</p>
+        </div>
+      </div>
+
+      {/* TOP 3 LOST-ITEM HOTSPOTS ON CAMPUS */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <h3 className="font-bold text-sm text-white flex items-center gap-2">
+          <Flame className="w-4 h-4 text-rose-400" /> Top 3 Lost-Item Hotspots on SRM Campus
+        </h3>
+
+        <div className="space-y-3">
+          {[
+            { rank: '#1', location: 'Tech Park 3rd & 4th Floor Computer Labs', share: '34%', count: '42 items logged' },
+            { rank: '#2', location: 'University Building (UB) Classrooms', share: '28%', count: '35 items logged' },
+            { rank: '#3', location: 'Central Library Quiet Reading Room', share: '18%', count: '22 items logged' }
+          ].map((hotspot, idx) => (
+            <div key={idx} className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono font-bold flex items-center justify-center text-xs">
+                  {hotspot.rank}
+                </span>
+                <div>
+                  <h4 className="font-bold text-xs text-white">{hotspot.location}</h4>
+                  <span className="text-[10px] font-mono text-slate-400">{hotspot.count}</span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="font-mono text-sm font-extrabold text-rose-400">{hotspot.share}</span>
+                <span className="block text-[10px] text-slate-500">Incident Share</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* WEEKLY RECOVERY CHART GRAPH (VISUAL SVG) */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <h3 className="font-bold text-sm text-white flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-emerald-400" /> Weekly Recovery Efficiency Trend
+        </h3>
+
+        <div className="h-44 w-full flex items-end justify-between gap-2 pt-4 px-2">
+          {[
+            { day: 'Mon', height: '60%', count: '14' },
+            { day: 'Tue', height: '80%', count: '22' },
+            { day: 'Wed', height: '75%', count: '19' },
+            { day: 'Thu', height: '95%', count: '28' },
+            { day: 'Fri', height: '85%', count: '24' },
+            { day: 'Sat', height: '40%', count: '8' },
+            { day: 'Sun', height: '50%', count: '11' }
+          ].map((bar, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+              <span className="text-[10px] font-mono text-emerald-400">{bar.count}</span>
+              <div
+                style={{ height: bar.height }}
+                className="w-full bg-gradient-to-t from-emerald-500/20 to-emerald-400 rounded-t-lg transition-all hover:brightness-125"
+              />
+              <span className="text-[10px] font-mono text-slate-400">{bar.day}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+function KarmaVaultSection({ userKarma, monthlyReturnCount }) {
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+      
+      {/* KARMA STATS HEADER */}
+      <div className="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-6 text-center space-y-3 backdrop-blur-md relative overflow-hidden">
+        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+          <Award className="w-8 h-8" />
+        </div>
+        <div>
+          <h2 className="font-extrabold text-xl text-white">SRM Karma Token Rewards System</h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Earn +50 Karma Points every time you safely return an item via OTP Vault Verification.
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-3 bg-slate-950 px-6 py-2.5 rounded-2xl border border-slate-800">
+          <span className="text-xs text-slate-400 font-mono">Your Current Points:</span>
+          <span className="text-xl font-extrabold text-amber-400 font-mono">{userKarma} PTS</span>
+        </div>
+
+        {/* SECURITY SAFEGUARD MONTHLY CAP DISPLAY */}
+        <div className="pt-2 text-center">
+          <span className="text-[11px] font-mono text-slate-400 bg-slate-950/80 px-3 py-1 rounded-full border border-slate-800">
+            🔒 Safeguard Active: {monthlyReturnCount} / 2 Rewarded Returns used this month
+          </span>
+        </div>
+      </div>
+
+      {/* UNLOCKED REDEMPTION PERKS */}
+      <div className="space-y-4">
+        <h3 className="font-bold text-sm text-white font-mono uppercase">Available SRM Student Perks</h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <Gift className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-white">7-Day Library Loan Extension</h4>
+              <p className="text-[11px] text-slate-400 mt-0.5">Extend any central library book checkout duration automatically.</p>
+            </div>
+            <button className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 font-mono text-xs py-2 rounded-xl border border-indigo-500/30">
+              Redeem (50 PTS)
+            </button>
+          </div>
+
+          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <Gift className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-white">10% Java Green Cafe Coupon</h4>
+              <p className="text-[11px] text-slate-400 mt-0.5">Valid at Java Green Canteen on all coffee & snack orders.</p>
+            </div>
+            <button className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-mono text-xs py-2 rounded-xl border border-emerald-500/30">
+              Code: JAVA-KARMA-50
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+function ClaimVaultModal({ item, onClose, onSuccessVerified }) {
+  const [otpCode, setOtpCode] = useState('884209'); // Generated 6-digit OTP
+  const [guardInputOtp, setGuardInputOtp] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleVerify = () => {
+    if (guardInputOtp === otpCode) {
+      onSuccessVerified(50); // +50 Karma Points
+    } else {
+      setErrorMsg('Invalid OTP Pass. Please check code with guard.');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-md bg-[#0F172A] border border-slate-800 rounded-2xl shadow-2xl p-6 space-y-5">
+        
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center space-y-1">
+          <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded">
+            Vault Escrow Pass
+          </span>
+          <h2 className="font-bold text-base text-white">OTP Escrow Claim</h2>
+          <p className="text-xs text-slate-400 font-mono">Item Ref: #{item.id}</p>
+        </div>
+
+        {/* 6-DIGIT GENERATED PASS DISPLAY */}
+        <div className="bg-slate-950 border border-emerald-500/40 p-5 rounded-2xl text-center space-y-2">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Your Dynamic 6-Digit Claim Pass</span>
+          <div className="text-3xl font-extrabold font-mono tracking-widest text-emerald-400">
+            {otpCode}
+          </div>
+          <p className="text-[10px] text-slate-500">Show this pass to the Security Desk Officer at {item.dropoffHub}</p>
+        </div>
+
+        {/* GUARD VERIFICATION INPUT MOCK */}
+        <div className="space-y-3">
+          <label className="block text-xs font-mono text-slate-400">
+            Security Guard Entry (Enter OTP to confirm handover):
+          </label>
+          <input
+            type="text"
+            maxLength={6}
+            value={guardInputOtp}
+            onChange={(e) => {
+              setGuardInputOtp(e.target.value);
+              setErrorMsg('');
+            }}
+            placeholder="Type 6-digit OTP..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-center text-sm font-mono text-white tracking-widest focus:outline-none focus:border-emerald-500"
+          />
+
+          {errorMsg && <p className="text-xs text-rose-400 font-mono text-center">{errorMsg}</p>}
+
+          <button
+            onClick={handleVerify}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/20"
+          >
+            Verify Handover & Complete Claim
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+function KarmaLevelUpModal({ points, monthlyCount, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-sm bg-[#0F172A] border border-amber-500/50 rounded-2xl shadow-2xl p-6 text-center space-y-5">
+        
+        <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 p-[2px] mx-auto animate-bounce">
+          <div className="w-full h-full bg-slate-950 rounded-full flex items-center justify-center text-amber-400">
+            <Award className="w-10 h-10" />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <h2 className="font-extrabold text-lg text-amber-300">Karma Level Up! 🎉</h2>
+          <p className="text-xs text-slate-300">
+            +50 Karma Points credited to your student profile!
+          </p>
+        </div>
+
+        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-left space-y-2 text-xs font-mono">
+          <span className="text-slate-400 block text-[10px]">UNLOCKED PERKS:</span>
+          <p className="text-emerald-400 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" /> 7-Day Library Extension
+          </p>
+          <p className="text-cyan-400 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" /> 10% Java Green Voucher
+          </p>
+        </div>
+
+        <p className="text-[10px] text-slate-500 font-mono">
+          Monthly Rewarded Returns: {monthlyCount} / 2 (Safeguards Active)
+        </p>
+
+        <button
+          onClick={onClose}
+          className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl shadow-lg shadow-amber-500/20"
+        >
+          Claim Rewards & Close
+        </button>
+
+      </div>
+    </div>
+  );
+}
